@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kappale - Henkilötietojärjestelmä</title>
+    <style>
+        /* Neon Cyan Theme */
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #111;
+    color: #00FFFF;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 20px; /* Increased font size */
+}
+
+h1 {
+    color: #00FFFF;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 28px; /* Increased font size */
+}
+
+.container {
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+}
+
+#searchInput {
+    width: 90%;
+    padding: 15px;
+    margin-bottom: 30px;
+    background-color: #333;
+    color: #00FFFF;
+    border: 2px solid #00FFFF;
+    border-radius: 8px;
+    font-size: 18px; /* Increased font size */
+}
+
+#searchResults {
+    list-style: none;
+    padding: 0;
+    text-align: center;
+    width: 100%;
+}
+
+.searchResult {
+    border: 2px solid #00FFFF;
+    padding: 15px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 8px;
+    width: 100%;
+    font-size: 18px; /* Increased font size */
+}
+
+.searchResult:hover {
+    background-color: #444;
+    color: #00FFFF;
+}
+
+#generateDocumentButton {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 15px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    font-size: 22px; /* Increased font size */
+    margin-top: 20px;
+    cursor: pointer;
+    border-radius: 8px;
+    width: 90%;
+}
+
+#personDetails {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 30px;
+    border: 2px solid #00FFFF;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+}
+
+#personDetails.active {
+    background-color: #4CAF50;
+}
+
+#personDetails h2 {
+    margin-bottom: 20px;
+    font-size: 24px; /* Increased font size */
+}
+
+.personDetail {
+    margin: 15px 0;
+    font-size: 20px; /* Increased font size */
+}
+
+#additionalDetails {
+    margin-top: 20px;
+    width: 90%;
+    font-size: 20px; /* Increased font size */
+}
+
+#personalNotes {
+    width: 90%;
+    padding: 15px;
+    box-sizing: border-box;
+    border: 2px solid #00FFFF;
+    border-radius: 8px;
+    width: 90%;
+    font-size: 18px; /* Increased font size */
+}
+
+#documentDisplay {
+    margin-top: 30px;
+    border: 2px solid #00FFFF;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    font-size: 20px; /* Increased font size */
+}
+
+#clickedPersonsLog,
+#logDisplay,
+#searchLogs {
+    list-style: none;
+    padding: 0;
+    text-align: center;
+    width: 100%;
+}
+
+#logDisplay {
+    display: none;
+    margin-top: 30px;
+    border: 2px solid #00FFFF;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    font-size: 20px; /* Increased font size */
+}
+
+#logDisplay h2 {
+    margin-bottom: 20px;
+    font-size: 24px; /* Increased font size */
+}
+
+#detailsBar {
+    background-color: #555;
+    color: #fff;
+    padding: 10px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 18px; /* Increased font size */
+}
+
+#greyBar {
+    background-color: #333;
+    color: #00ffff;
+    padding: 2px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    border-top: 2px solid #00FFFF;
+    font-size: 18px; /* Increased font size */
+}
+/* Add margin to text elements */
+#personDetails,
+#personalNotes,
+#documentDisplay,
+#logDisplay,
+#additionalDetails,
+#clickedPersonsLog,
+.personDetail {
+    margin: 10px;
+}
+/* Center all text */
+body,
+h1,
+#generateDocumentButton,
+.searchResult,
+#searchInput,
+#additionalDetails,
+#personalNotes,
+#documentDisplay,
+#logDisplay,
+#clickedPersonsLog {
+    text-align: center;
+}
+    </style>
+</head>
+<body>
+    <h1>Henkilöhaku Ja Tietojen muutos</h1>
+    <input type="text" id="searchInput" placeholder="Search by name" oninput="displaySearchResults(this.value)">
+    <ul id="searchResults"></ul>
+    <div id="personDetails">
+        <h2>Henkilön Tiedot</h2>
+        <p><strong>ID:</strong> <span id="personID"></span></p>
+        <p><strong>Nimi:</strong> <span id="personName"></span></p>
+        <p><strong>Osuua:</strong> <span id="personRole"></span></p>
+        <p><strong>Artistinimi :</strong> <span id="personArtistName"></span></p>
+        <div id="additionalDetails"></div>
+        <div>
+            <label for="personalNotes">Personal Notes:</label>
+            <textarea id="personalNotes" rows="4" placeholder="Add personal notes..."></textarea>
+        </div>
+        <button id="generateDocumentButton" onclick="generateDocument()">Tallenna Viesti Lokiin MUISTA HENKILÖN NIMI</button>
+    </div>
+    <div id="documentDisplay"></div>
+    <button id="showLogButton" onclick="showLog()">Näytä Henkilöloki</button>
+    <div id="logDisplay">
+        <h2>Hakuloki</h2>
+        <ul id="clickedPersonsLog"></ul>
+    </div>
+    <ul id="searchLogs"></ul>
+    <!-- Grey bar -->
+    <div id="greyBar">
+        <p><strong>JNM RECORDS 2023</strong> | Sessiotunnus : <span id="sessionID"></span> | Aikaleima: <span id="currentDate"></span></p>
+    </div>
+<Script>
+    const peopleData = [
+    { 
+    Nimi: "Jiri Ahonen",
+    Osuus: "Tuottaja",
+    Artistinimi: "Jiri Ahonen",
+    ID: generateID(),
+    Lisatiedot: "",
+    Muistiinpanot: [] 
+},
+{ 
+    Nimi: "Nuutti Jussila",
+    Osuus: "Sanoittaja, Artisti",
+    Artistinimi: "Nikoolai",
+    ID: generateID(),
+    Lisatiedot: "",
+    Muistiinpanot: [] 
+},
+{ 
+    Nimi: "Riikka Pylkkänen",
+    Osuus: "Laulaja, Artisti",
+    Artistinimi: "RIIKKA",
+    ID: generateID(),
+    Lisatiedot: "",
+    Muistiinpanot: [] 
+},
+{ 
+    Nimi: "Albert Manninen",
+    Osuus: "Artisti",
+    Artistinimi: "Albert",
+    ID: generateID(),
+    Lisatiedot: "",
+    Muistiinpanot: [] 
+},
+{ 
+    Nimi: "Eetu Eskelinen",
+    Osuus: "Grafiikka",
+    Artistinimi: "NO DATA PHONOGRAMMIN SUUNNITTELU- PLAYAS- SE6FC2315490",
+    ID: generateID(),
+    Lisatiedot: "",
+    Muistiinpanot: [] 
+},
+{ 
+    Nimi: "Anna Riaikinen",
+    Osuus: "Artisti",
+    Artistinimi: "Anna Ria",
+    ID: generateID(),
+    Lisatiedot: "",
+    Muistiinpanot: [] 
+},
+{ 
+    Nimi: "Dani Kaikkonen",
+    Osuus: "Artisti",
+    Artistinimi: "D4N1",
+    ID: generateID(),
+    Lisatiedot: "",
+    Muistiinpanot: [] 
+},
+{ 
+    Nimi: "Tuomas Hyväri",
+    Osuus: "Artisti",
+    Artistinimi: "NO DATA",
+    ID: generateID(),
+    Lisatiedot: "",
+    Muistiinpanot: [] 
+},
+{ 
+    Nimi: "Milo Eskelinen",
+    Osuus: "Artisti",
+    Artistinimi: "NO DATA",
+    ID: generateID(),
+    Lisatiedot: "",
+    Muistiinpanot: [] 
+},
+{ 
+    Nimi: "Waltteri Viljanen",
+    Osuus: "Artisti",
+    Artistinimi: "Spook",
+    ID: generateID(),
+    Lisatiedot: "",
+    Muistiinpanot: [] 
+},
+{ 
+    Nimi: "Jere Särkkä",
+    Osuus: "Tuottaja",
+    Artistinimi: "JS",
+    ID: generateID(),
+    Lisatiedot: "",
+    Muistiinpanot: [] 
+},
+{ 
+    Nimi: "Oula Nyyssönen",
+    Osuus: "Tuotanto, Laulu, Sanoitus",
+    Artistinimi: "ONA",
+    ID: generateID(),
+    Lisatiedot: "",
+    Muistiinpanot: [] 
+},
+{ 
+    Nimi: "Milo Nylund",
+    Osuus: "Artisti (EX)",
+    Artistinimi: "MCL",
+    ID: generateID(),
+    Lisatiedot: "",
+    Muistiinpanot: [] 
+},
+{ 
+    Nimi: "Zainy",
+    Osuus: "Tuottaja",
+    Artistinimi: "Zainy",
+    ID: generateID(),
+    Lisatiedot: "",
+    Muistiinpanot: [] 
+},
+{ 
+    Nimi: "Eeti Lappalainen",
+    Osuus: "Rumpali, Kitaristi",
+    Artistinimi: "EetiL",
+    ID: generateID(),
+    Lisatiedot: "",
+    Muistiinpanot: [] 
+},
+{ 
+    Nimi: "Elias Jaara",
+    Osuus: "Artisti",
+    Artistinimi: "YBN Yeltsu",
+    ID: generateID(),
+    Lisatiedot: "",
+    Muistiinpanot: [] 
+}
+// Jatka samalla rakenteella jokaiselle henkilölle
+// ...
+];
+
+
+        // Display search results
+        function displaySearchResults(query) {
+            var resultsContainer = document.getElementById("searchResults");
+            resultsContainer.innerHTML = ""; // Clear previous results
+
+            // Simulate searching, for now, you might replace this with actual search logic
+            var searchResults = peopleData.filter(person => person.Nimi.toLowerCase().includes(query.toLowerCase()));
+
+            searchResults.forEach(function (result) {
+                var listItem = document.createElement("li");
+                listItem.classList.add("searchResult");
+                listItem.textContent = result.Nimi;
+                listItem.onclick = function () {
+                    displayPersonDetails(result);
+                };
+                resultsContainer.appendChild(listItem);
+            });
+        }
+
+        // Display person details
+        function displayPersonDetails(person) {
+            var personID = document.getElementById("personID");
+            var personName = document.getElementById("personName");
+            var personRole = document.getElementById("personRole");
+            var personArtistName = document.getElementById("personArtistName");
+            var additionalDetails = document.getElementById("additionalDetails");
+            var personalNotes = document.getElementById("personalNotes");
+
+            personID.textContent = person.ID;
+            personName.textContent = person.Nimi;
+            personRole.textContent = person.Osuus;
+            personArtistName.textContent = person.Artistinimi;
+
+            // Display additional details
+            var detailsList = person.Lisatiedot.split(" ");
+            additionalDetails.innerHTML = ""; // Clear previous details
+
+            detailsList.forEach(function (detail) {
+                var detailItem = document.createElement("p");
+                detailItem.textContent = detail;
+                additionalDetails.appendChild(detailItem);
+            });
+
+            // Display personal notes
+            personalNotes.value = getPersonalNotes(person.ID);
+
+            // Show the details container
+            var personDetails = document.getElementById("personDetails");
+            personDetails.style.display = "block";
+
+            // Log the clicked person
+            logClickedPerson(person.Nimi, personalNotes.value);
+        }
+
+        // Generate a unique ID in the format JNM1124 - JNM1150
+        function generateID() {
+            var prefix = "JNM";
+            var randomNum = Math.floor(1124 + Math.random() * (1150 - 1124 + 1));
+            return prefix + randomNum;
+        }
+
+        // Generate document (placeholder for now)
+        function generateDocument() {
+            var documentDisplay = document.getElementById("documentDisplay");
+            var personalNotes = document.getElementById("personalNotes").value;
+
+            // Save personal notes
+            savePersonalNotes(personID.textContent, personalNotes);
+
+            // Save to search logs
+            saveToSearchLogs(personID.textContent, personalNotes);
+
+            // Placeholder message
+            documentDisplay.textContent = "Viesti Tallennettu\nPERNOTES\n" + personalNotes;
+        }
+
+        // Save personal notes to localStorage
+        function savePersonalNotes(personName, notes) {
+            var savedNotes = JSON.parse(localStorage.getItem("personalNotes")) || {};
+            savedNotes[personID] = notes;
+            localStorage.setItem("personalNotes", JSON.stringify(savedNotes));
+        }
+
+        // Get personal notes from localStorage
+        function getPersonalNotes(personID) {
+            var savedNotes = JSON.parse(localStorage.getItem("personalNotes")) || {};
+            return savedNotes[personID] || "";
+        }
+
+        // Log clicked persons to localStorage with notes and timestamp
+        function logClickedPerson(personID, notes) {
+            var clickedPersons = JSON.parse(localStorage.getItem("clickedPersons")) || [];
+            var timestamp = generateTimestamp();
+            clickedPersons.push({ name: personName, notes: notes, timestamp: timestamp });
+            localStorage.setItem("clickedPersons", JSON.stringify(clickedPersons));
+
+            // Update the log display
+            displayClickedPersonsLog();
+        }
+
+        // Generate a random timestamp
+        function generateTimestamp() {
+            var timestamp = new Date().toISOString();
+            return timestamp;
+        }
+
+        // Display clicked persons log
+        function displayClickedPersonsLog() {
+            var clickedPersonsLog = document.getElementById("clickedPersonsLog");
+
+            // Retrieve clicked persons from localStorage
+            var clickedPersons = JSON.parse(localStorage.getItem("clickedPersons")) || [];
+
+            // Display clicked persons in the log
+            clickedPersonsLog.innerHTML = ""; // Clear previous log
+
+            clickedPersons.forEach(function (person) {
+                var logItem = document.createElement("li");
+                logItem.textContent = `${person.name} - ${person.timestamp}`;
+                clickedPersonsLog.appendChild(logItem);
+            });
+        }
+
+        // Show the log display
+        function showLog() {
+            var logDisplay = document.getElementById("logDisplay");
+            logDisplay.style.display = "block";
+        }
+
+        // Save to search logs
+        function saveToSearchLogs(personID, notes) {
+            var searchLogs = JSON.parse(localStorage.getItem("searchLogs")) || [];
+            var timestamp = generateTimestamp();
+            searchLogs.push({ personID: personID, notes: notes, timestamp: timestamp });
+            localStorage.setItem("searchLogs", JSON.stringify(searchLogs));
+
+            // Update the search logs display
+            displaySearchLogs();
+        }
+
+        // Display search logs
+        function displaySearchLogs() {
+            var searchLogsContainer = document.getElementById("searchLogs");
+
+            // Retrieve search logs from localStorage
+            var searchLogs = JSON.parse(localStorage.getItem("searchLogs")) || [];
+
+            // Display search logs
+            searchLogsContainer.innerHTML = ""; // Clear previous logs
+
+            searchLogs.forEach(function (log) {
+                var logItem = document.createElement("li");
+                logItem.textContent = `HENKILÖ ID: ${log.personID}, Muistiinpano: ${log.notes}, Aikaleima: ${log.timestamp}`;
+                searchLogsContainer.appendChild(logItem);
+            });
+        }
+
+        // Initialize session ID and current date
+        var sessionID = generateID();
+        var currentDate = getCurrentDate();
+
+        // Display session ID and current date
+        document.getElementById("sessionID").textContent = sessionID;
+        document.getElementById("currentDate").textContent = currentDate;
+
+        // Generate current date in the format DD-MM-YYYY
+        function getCurrentDate() {
+            var today = new Date();
+            var dd = String(today.getDate()).padStart(2, '0');
+            var mm = String(today.getMonth() + 1).padStart(2, '0');
+            var yyyy = today.getFullYear();
+            return dd + '-' + mm + '-' + yyyy;
+        }
+        
+    </script>
+</body>
+</html>
